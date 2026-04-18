@@ -4,21 +4,98 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MuscleReal — 筋トレしないと投稿できないSNS</title>
-  <meta name="description" content="筋トレ中だけ投稿できる。本物のトレーニーのためのSNS。">
+  <meta name="description" content="本物のトレーニーだけのための招待制フィットネスSNS。AIが筋トレ風景を厳しく審査し、クリアした者だけが今日の成果を共有できる。今日をサボれば投稿不可能。">
   <meta name="theme-color" content="#080810">
+  
+  <!-- OGP / SEO Tags -->
+  <meta property="og:title" content="MuscleReal | 筋トレしないと投稿できないSNS">
+  <meta property="og:description" content="AIがあなたのワークアウトを審査する。本物のトレーニーだけが集う、妥協なきフィットネスSNS。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://musclereal.onrender.com/">
+  <!-- Using a placeholder image or a nice gradient for og:image since we don't have a static asset yet -->
+  <meta property="og:image" content="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MuscleReal - 筋トレしないと投稿できないSNS">
+  <meta name="twitter:description" content="AI審査を突破せよ。サボれば投稿できない硬派なSNS。">
+
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .lp-hero {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 0 16px;
+    }
+    .lp-hero h1 {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--orange), #0077FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+    .lp-hero p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .lp-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .lp-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-card);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+    .lp-feature-icon {
+      font-size: 24px;
+    }
+    .lp-feature-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .lp-feature-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+  </style>
 </head>
 <body>
 
 <div class="auth-page" id="authPage">
 
-  <!-- Logo -->
-  <div class="auth-logo">
-    <div class="auth-logo-text">
-      <span style="color: var(--orange)">💪Muscle</span><span>Real</span>
+  <!-- LP Hero -->
+  <div class="lp-hero">
+    <h1>MuscleReal</h1>
+    <p>言い訳は不要。<br><strong>「今日、筋トレをした者」</strong>だけが参加できる<br>妥協なきフィットネスSNS。</p>
+  </div>
+
+  <div class="lp-features">
+    <div class="lp-feature">
+      <div class="lp-feature-icon">🤖</div>
+      <div>
+        <div class="lp-feature-title">AIによる厳格な動画審査</div>
+        <div class="lp-feature-desc">投稿される動画はすべてAIが解析。「本当に健康的なアクションをしているか」を厳しく判定します。</div>
+      </div>
     </div>
-    <p class="auth-logo-sub">筋トレしないと投稿できない。<br>本物のトレーニーだけのSNS。</p>
+    <div class="lp-feature">
+      <div class="lp-feature-icon">🔒</div>
+      <div>
+        <div class="lp-feature-title">内輪だけのグループ機能</div>
+        <div class="lp-feature-desc">全世界公開だけでなく、合言葉を知るジム仲間だけの「クローズドなコミュニティ」で切磋琢磨できます。</div>
+      </div>
+    </div>
   </div>
 
   <!-- Card -->
