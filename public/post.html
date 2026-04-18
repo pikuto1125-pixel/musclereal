@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>投稿する — MuscleReal</title>
+  <meta name="description" content="今日のトレーニングを記録・投稿しよう">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Timer ring at top */
+    .timer-ring-section {
+      text-align: center;
+      padding: 24px 0 16px;
+    }
+
+    .timer-ring {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,107,53,0.08);
+      border: 1px solid rgba(255,107,53,0.3);
+      border-radius: var(--radius-lg);
+      padding: 16px 32px;
+    }
+
+    /* Motivation quotes */
+    .motivation-quote {
+      background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,215,0,0.05));
+      border-left: 3px solid var(--orange);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* Locked state */
+    .locked-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,8,16,0.96);
+      backdrop-filter: blur(10px);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 32px;
+      gap: 16px;
+    }
+
+    .locked-icon { font-size: 64px; }
+    .locked-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .locked-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 280px; }
+  </style>
+</head>
+<body>
+
+<!-- Locked Overlay (shown when not training) -->
+<div class="locked-overlay hidden" id="lockedOverlay">
+  <span class="locked-icon">🔒</span>
+  <h2 class="locked-title">トレーニング中のみ<br>投稿できます</h2>
+  <p class="locked-desc">
+    まずトレーニングを開始してください。<br>
+    20分間だけ投稿できます。
+  </p>
+  <button class="btn btn-primary btn-lg" onclick="window.location.href='feed.html'">
+    フィードに戻る
+  </button>
+</div>
+
+<div class="app-wrapper">
+  <!-- Header -->
+  <header class="header">
+    <button class="icon-btn" onclick="window.location.href='feed.html'" title="戻る">←</button>
+    <div style="font-size:17px; font-weight:800;">今日のトレーニング</div>
+    <div style="width:40px;"></div>
+  </header>
+
+  <main class="page-content" style="padding-top: 16px;">
+
+    <!-- Timer -->
+    <div class="timer-ring-section">
+      <div class="timer-ring">
+        <span class="timer-label">残り時間</span>
+        <span class="timer-display" id="postTimerDisplay">20:00</span>
+        <span class="timer-label" style="color:var(--orange)">投稿可能ウィンドウ</span>
+      </div>
+    </div>
+
+    <!-- Motivation -->
+    <div class="motivation-quote" id="motivationQuote">
+      "辛いのは成長している証拠だ。諦めた瞬間に成長は止まる。"
+    </div>
+
+    <!-- Post Form -->
+    <form id="postForm" onsubmit="handleSubmitPost(event)">
+
+      <!-- Muscle Part Selection -->
+      <div class="form-group">
+        <label class="form-label">鍛えた部位（複数選択OK）</label>
+        <div class="muscle-selector">
+          <div class="muscle-option" data-muscle="胸" onclick="toggleMuscle(this)">
+            <span class="muscle-emoji">💪</span>胸
+          </div>
+          <div class="muscle-option" data-muscle="背中" onclick="toggleMuscle(this)">
+            <span class="muscle-emoji">🏔️</span>背中
+          </div>
+          <div class="muscle-option" data-muscle="脚" onclick="toggleMuscle(this)">
+            <span class="muscle-emoji">🦵</span>脚
+          </div>
+          <div class="muscle-option" data-muscle="肩" onclick="toggleMuscle(this)">
+            <span class="muscle-emoji">⚡</span>肩
+          </div>
+          <div class="muscle-option" data-muscle="腕" onclick="toggleMuscle(this)">
+            <span class="muscle-emoji">🦾</span>腕
+          </div>
+          <div class="muscle-option" data-muscle="腹" onclick="toggleMuscle(this)">
+            <span class="muscle-emoji">🧱</span>腹
+          </div>
+        </div>
+      </div>
+
+      <!-- Exercise Name -->
+      <div class="form-group">
+        <label class="form-label" for="exerciseName">種目名</label>
+        <input class="form-input" type="text" id="exerciseName" placeholder="例: ベンチプレス、スクワット..." required>
+      </div>
+
+      <!-- Weight / Sets / Reps -->
+      <div class="form-group">
+        <label class="form-label">重量・セット数・レップ数</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+          <div>
+            <input class="form-input" type="number" id="weight" placeholder="重量 kg" min="0" max="1000" step="0.5">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;text-align:center;">kg</div>
+          </div>
+          <div>
+            <input class="form-input" type="number" id="sets" placeholder="セット" min="1" max="100">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;text-align:center;">set</div>
+          </div>
+          <div>
+            <input class="form-input" type="number" id="reps" placeholder="回数" min="1" max="1000">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;text-align:center;">rep</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image / Video Upload -->
+      <div class="form-group">
+        <label class="form-label" for="postImage">今日の動画・写真を撮る 📷 (任意/必須)</label>
+        <input class="form-input" type="file" id="postImage" accept="video/mp4,video/*,image/*" capture="environment" style="background:var(--bg-card); padding:10px;">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">※その日最初の投稿は動画・写真が必須です</div>
+      </div>
+
+      <!-- Comment -->
+      <div class="form-group">
+        <label class="form-label" for="postComment">一言コメント</label>
+        <textarea class="form-input form-textarea" id="postComment" placeholder="今日の感想、記録、気づきなど…" maxlength="200"></textarea>
+        <div style="font-size:11px;color:var(--text-muted);text-align:right;" id="commentCount">0 / 200</div>
+      </div>
+
+      <!-- Visibility -->
+      <div class="form-group">
+        <label class="form-label" for="postGroup">公開範囲</label>
+        <select id="postGroup" class="form-input">
+          <option value="">🌍 Global (全員に公開)</option>
+          <!-- JS Rendered Groups -->
+        </select>
+      </div>
+
+      <!-- Submit button -->
+      <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmitPost()" disabled style="margin-top:24px;">
+        投稿する
+      </button>
+      <div style="height:8px;"></div>
+
+    </form>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a class="nav-item" href="feed.html">
+      <span class="nav-icon">🏠</span>
+      <span>フィード</span>
+    </a>
+    <button class="nav-post-btn" onclick="void(0)" style="pointer-events:none; opacity:0.5;">＋</button>
+    <a class="nav-item" href="profile.html">
+      <span class="nav-icon">👤</span>
+      <span>プロフィール</span>
+    </a>
+  </nav>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/app.js"></script>
+<script src="js/post.js"></script>
+</body>
+</html>

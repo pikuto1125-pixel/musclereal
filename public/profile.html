@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プロフィール — MuscleReal</title>
+  <meta name="description" content="あなたのトレーニング記録と実績">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Profile hero */
+    .profile-hero {
+      padding: 28px 20px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .profile-avatar-large {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--orange), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 14px;
+      box-shadow: 0 0 30px rgba(255,107,53,0.3);
+    }
+
+    .profile-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 2px;
+    }
+
+    .profile-handle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Heatmap */
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 4px;
+    }
+
+    .calendar-day-label {
+      font-size: 10px;
+      text-align: center;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .ranking-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <span class="logo-muscle">💪Muscle</span><span class="logo-real">Real</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="logout()" title="ログアウト">🚪</button>
+    </div>
+  </header>
+
+  <main class="page-content" style="padding-top: 0;">
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+      <div class="profile-avatar-large" id="profileAvatar">💪</div>
+      <div class="profile-name" id="profileName">—</div>
+      <div class="profile-handle" id="profileHandle">@—</div>
+
+      <!-- Streak + Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statStreak">0</div>
+          <div class="stat-label">🔥 連続日数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statPosts">0</div>
+          <div class="stat-label">📝 投稿数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statVolume">0</div>
+          <div class="stat-label">💪 総kg量</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 0 4px;">
+
+      <!-- Calendar Heatmap -->
+      <div class="glass-card mb-16">
+        <h3 class="section-title">📅 トレーニングカレンダー</h3>
+        <div class="calendar-header">
+          <div class="calendar-day-label">日</div>
+          <div class="calendar-day-label">月</div>
+          <div class="calendar-day-label">火</div>
+          <div class="calendar-day-label">水</div>
+          <div class="calendar-day-label">木</div>
+          <div class="calendar-day-label">金</div>
+          <div class="calendar-day-label">土</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="text-xs text-muted text-center mt-8">過去28日間</div>
+      </div>
+
+      <!-- Badges -->
+      <div class="glass-card mb-16">
+        <h3 class="section-title">🏅 バッジ</h3>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </div>
+
+      <!-- Ranking -->
+      <div class="ranking-section">
+        <h3 class="section-title">🏆 ランキング（連続日数）</h3>
+        <div id="rankingList"></div>
+      </div>
+
+      <!-- My Posts -->
+      <div>
+        <h3 class="section-title mt-16">📝 自分の投稿</h3>
+        <div id="myPosts"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a class="nav-item" href="feed.html">
+      <span class="nav-icon">🏠</span>
+      <span>フィード</span>
+    </a>
+    <button class="nav-post-btn" id="navPostBtn" onclick="goToPost()">＋</button>
+    <a class="nav-item active" href="profile.html">
+      <span class="nav-icon">👤</span>
+      <span>プロフィール</span>
+    </a>
+  </nav>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/app.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フィード — MuscleReal</title>
+  <meta name="description" content="筋トレ仲間のリアルな投稿を見よう。でも今日サボると全部ぼける。">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Training start screen overlay */
+    .training-start-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 8, 16, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .training-start-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-active);
+      border-radius: var(--radius-xl);
+      padding: 40px 28px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: var(--shadow-orange);
+    }
+
+    .training-icon-big {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: bounce-icon 1.5s ease-in-out infinite;
+    }
+
+    @keyframes bounce-icon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .training-start-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .training-start-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Active training bar */
+    .training-active-bar {
+      background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,215,0,0.08));
+      border: 1px solid rgba(255,107,53,0.4);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0 16px;
+    }
+
+    .training-active-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .training-active-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .training-active-timer {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--orange);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+    }
+
+    /* Feed filters */
+    .feed-filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin: 12px 0;
+      scrollbar-width: none;
+    }
+    .feed-filters::-webkit-scrollbar { display: none; }
+
+    .filter-chip {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      color: var(--text-secondary);
+    }
+
+    .filter-chip.active {
+      background: rgba(255,107,53,0.12);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    /* Post no-image body */
+    .post-noimg-body {
+      padding: 16px;
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Sabotage banner (今日サボっている場合) */
+    .sabo-banner {
+      background: rgba(255, 80, 80, 0.08);
+      border: 1px solid rgba(255, 80, 80, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      margin: 8px 0 16px;
+      text-align: center;
+    }
+
+    .sabo-text {
+      font-size: 13px;
+      color: #ff8080;
+      font-weight: 600;
+    }
+
+    /* Done banner */
+    .done-banner {
+      background: rgba(50, 205, 50, 0.08);
+      border: 1px solid rgba(50, 205, 50, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      margin: 8px 0 16px;
+      text-align: center;
+      font-size: 13px;
+      color: #80ff80;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Group Management Modal -->
+<div class="overlay hidden" id="groupModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">👥 グループ管理</h3>
+    <p class="text-sm text-muted mb-16">友達やジム仲間と内輪で共有するグループを作成・参加できます。</p>
+    
+    <div style="margin-bottom: 24px;">
+      <h4>グループに参加する</h4>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="text" id="joinGroupCode" class="form-input" placeholder="合言葉 (例: gym-12345)" style="flex:1;">
+        <button class="btn btn-primary" onclick="joinGroup()">参加</button>
+      </div>
+    </div>
+
+    <div>
+      <h4>新しくグループを作る</h4>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="text" id="createGroupName" class="form-input" placeholder="グループ名" style="flex:1;">
+        <button class="btn btn-gold" onclick="createGroup()">作成</button>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <h4>参加中のグループ</h4>
+      <div id="myGroupsList" style="margin-top:8px; font-size:14px; max-height:100px; overflow-y:auto;">
+        <!-- JS rendered -->
+      </div>
+    </div>
+
+    <button class="btn btn-ghost btn-full mt-16" onclick="closeGroupModal()">閉じる</button>
+  </div>
+</div>
+
+<!-- Training Start Overlay -->
+<div class="training-start-overlay hidden" id="trainingStartOverlay">
+  <div class="training-start-card">
+    <span class="training-icon-big">🏋️</span>
+    <h2 class="training-start-title">今日のトレーニング<br>開始しますか？</h2>
+    <p class="training-start-desc">
+      開始後 <strong style="color:var(--orange)">20分間</strong> だけ投稿できます。<br>
+      今日サボると投稿がぼかして表示されます💀
+    </p>
+    <button class="btn btn-primary btn-full btn-lg" id="confirmStartBtn" onclick="confirmStartTraining()">
+      💪 トレーニング開始！
+    </button>
+    <button class="btn btn-ghost btn-full mt-8" onclick="closeStartOverlay()">
+      今日はやめておく（投稿も閲覧も制限されます）
+    </button>
+  </div>
+</div>
+
+<div class="app-wrapper">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <span class="logo-muscle">💪Muscle</span><span class="logo-real">Real</span>
+    </div>
+    <div class="header-actions">
+      <div class="streak-display" id="headerStreak">
+        <span class="streak-fire">🔥</span>
+        <span id="streakCount">0</span>
+      </div>
+      <button class="icon-btn" onclick="logout()" title="ログアウト">🚪</button>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="page-content" style="padding-top: 16px;">
+
+    <!-- Training Status Area -->
+    <div id="trainingArea"></div>
+
+    <!-- Today's Status Banner -->
+    <div id="todayBanner"></div>
+
+    <!-- Feed Header (Tabs & Filters) -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div class="feed-tabs" style="display:flex; gap:8px;">
+        <button class="filter-chip active" id="tab-global" onclick="switchFeedTab('global')">🌍 Global</button>
+        <button class="filter-chip" id="tab-groups" onclick="switchFeedTab('groups')">🔒 Groups</button>
+        <button class="btn btn-ghost btn-sm" onclick="openGroupModal()" style="padding:4px 8px; font-size:12px;">⚙️ 管理</button>
+      </div>
+      
+      <div class="filter-scroll" style="flex:1; justify-content:flex-end;">
+        <button class="filter-chip active" id="filter-all" onclick="setFilter('all')">すべて</button>
+        <button class="filter-chip" id="filter-胸" onclick="setFilter('胸')">💪胸</button>
+        <button class="filter-chip" id="filter-背中" onclick="setFilter('背中')">🏔️背中</button>
+        <button class="filter-chip" id="filter-脚" onclick="setFilter('脚')">🦵脚</button>
+      </div>
+    </div>
+
+    <!-- Post Feed -->
+    <div id="postFeed"></div>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="feed.html" id="navFeed">
+      <span class="nav-icon">🏠</span>
+      <span>フィード</span>
+    </a>
+    <button class="nav-post-btn" id="navPostBtn" onclick="goToPost()" title="投稿する">＋</button>
+    <a class="nav-item" href="profile.html" id="navProfile">
+      <span class="nav-icon">👤</span>
+      <span>プロフィール</span>
+    </a>
+  </nav>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/app.js"></script>
+<script src="js/feed.js"></script>
+</body>
+</html>

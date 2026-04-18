@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MuscleReal — 筋トレしないと投稿できないSNS</title>
+  <meta name="description" content="筋トレ中だけ投稿できる。本物のトレーニーのためのSNS。">
+  <meta name="theme-color" content="#080810">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-page" id="authPage">
+
+  <!-- Logo -->
+  <div class="auth-logo">
+    <div class="auth-logo-text">
+      <span style="color: var(--orange)">💪Muscle</span><span>Real</span>
+    </div>
+    <p class="auth-logo-sub">筋トレしないと投稿できない。<br>本物のトレーニーだけのSNS。</p>
+  </div>
+
+  <!-- Card -->
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">ログイン</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">新規登録</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="formLogin">
+      <div class="form-group">
+        <label class="form-label" for="loginUsername">ユーザー名</label>
+        <input class="form-input" type="text" id="loginUsername" placeholder="@username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">パスワード</label>
+        <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" id="loginBtn" onclick="handleLogin()">
+        🔓 ログイン
+      </button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="formSignup" class="hidden">
+      <div class="form-group">
+        <label class="form-label" for="signupUsername">ユーザー名</label>
+        <input class="form-input" type="text" id="signupUsername" placeholder="@username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signupDisplayName">表示名</label>
+        <input class="form-input" type="text" id="signupDisplayName" placeholder="山田 太郎">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signupPassword">パスワード</label>
+        <input class="form-input" type="password" id="signupPassword" placeholder="8文字以上" autocomplete="new-password">
+      </div>
+      <button class="btn btn-gold btn-full btn-lg" id="signupBtn" onclick="handleSignup()">
+        💪 トレーニーとして登録
+      </button>
+      <p class="text-xs text-muted text-center mt-8">
+        登録することで、毎日筋トレすることに同意したものとみなします💀
+      </p>
+    </div>
+
+    <!-- Demo accounts hint -->
+    <div class="divider-text mt-16">デモアカウント</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <button class="btn btn-ghost btn-sm" onclick="demoLogin('tanaka', 'tanaka123')">
+        🏋️ tanaka
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="demoLogin('yuki', 'yuki123')">
+        💪 yuki
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/app.js"></script>
+<script>
+  // Redirect if already logged in
+  if (getUser()) {
+    window.location.href = 'feed.html';
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+    document.getElementById('formLogin').classList.toggle('hidden', tab !== 'login');
+    document.getElementById('formSignup').classList.toggle('hidden', tab !== 'signup');
+  }
+
+  async function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!username || !password) return showToast('ユーザー名とパスワードを入力してください', 'error');
+
+    try {
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+      setAuth(data.token, data.user);
+      showToast(`おかえり、${data.user.displayName}！💪`, 'success');
+      setTimeout(() => window.location.href = 'feed.html', 800);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function handleSignup() {
+    const username = document.getElementById('signupUsername').value.trim().replace('@', '');
+    const displayName = document.getElementById('signupDisplayName').value.trim();
+    const password = document.getElementById('signupPassword').value;
+
+    if (!username || !displayName || !password) return showToast('すべての項目を入力してください', 'error');
+    if (password.length < 6) return showToast('パスワードは6文字以上にしてください', 'error');
+    if (username.length < 2) return showToast('ユーザー名は2文字以上にしてください', 'error');
+
+    try {
+      const data = await apiFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ username, displayName, password })
+      });
+      setAuth(data.token, data.user);
+      showToast(`ようこそ、${displayName}！地獄へ🔥`, 'success');
+      setTimeout(() => window.location.href = 'feed.html', 800);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function demoLogin(username, password) {
+    document.getElementById('loginUsername').value = username;
+    document.getElementById('loginPassword').value = password;
+    switchTab('login');
+    setTimeout(handleLogin, 200);
+  }
+</script>
+</body>
+</html>
